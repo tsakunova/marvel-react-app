@@ -6,10 +6,6 @@ import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
 class RandomChar extends Component{
-    constructor(props) {
-        super(props);
-        this.updateChar();
-    }
 
     state = {
         char: {},
@@ -17,12 +13,15 @@ class RandomChar extends Component{
         error: false
     }
 
-    
-
     marvelService = new MarvelService();
 
+    componentDidMount() {
+        this.updateChar();
+    }
+
     updateChar = () => {
-        const id = Math.floor(Math.random()*(1011400-1011000)+1011000);
+        const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
+        this.onCharLoading();
         this.marvelService
             .getCharacter(id)
             .then(this.onCharLoaded)
@@ -35,13 +34,16 @@ class RandomChar extends Component{
             error: true
         })
     }
-
+    onCharLoading = (char) => {
+            this.setState({ char, loading:true })
+    }
+    
     onCharLoaded = (char) => {
         this.setState({ char, loading:false })
     }
   
     render() {
-           const {char, loading, error} = this.state;
+        const {char, loading, error} = this.state;
         const errorMessage = error ? <ErrorMessage/> : null;
         const spinner = loading ? <Spinner/> : null;
         const content = !(loading || error) ? <View char={char}/> : null;
@@ -60,7 +62,7 @@ class RandomChar extends Component{
                     Or choose another one
                 </p>
                 <button className="button button__main">
-                    <div className="inner">try it</div>
+                    <div className="inner" onClick={this.updateChar}>try it</div>
                 </button>
                 <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
             </div>
@@ -75,7 +77,17 @@ const View = ({char}) => {
 
     return (
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className="randomchar__img"/>
+            < img src = {
+                thumbnail
+            }
+            alt = "Random character"
+            className = "randomchar__img"
+            style = {
+                thumbnail.includes('image_not_available')
+                    ? { objectFit: 'contain' }
+                    : { objectFit: 'cover' }
+            }
+            />
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
